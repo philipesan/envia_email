@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Envie seu E-mail!</title>
+    <!-- Coisas do Bootstrap -->
+    <link href="{{ url_for('static', filename='bootstrap.min.css') }}" rel="stylesheet">
+    <!-- Estilo -->
+    <link href="{{ url_for('static', filename='narrow-jumbotron.css') }}" rel="stylesheet">
+    <script type="text/javascript">
+      function validar(remetente, destinatario, assunto, mensagem) {
+          if (remetente.value === '') {
+              alert("Preencha o Remetente.");
+              return false;
+          }
+          if (destinatario.value === '') {
+              alert("Preencha o Destinatario.");
+              return false;
+          }
+          if (assunto.value === '') {
+              alert("Preencha o Assunto.");
+              return false;
+          }
+          if (mensagem.value === '') {
+              alert("Preencha a Mensagem.");
+              return false;
+          }
+          return true;
+      }
+      function salvar() {
+          const remetente = document.getElementById('remetente');
+          const destinatario = document.getElementById('destinatario');
+          const assunto = document.getElementById('assunto');
+          const mensagem = document.getElementById('mensagem');
+          var url = "http://localhost:80/envio";
+          var metodo = "POST";
+          if (!validar(remetente, destinatario, assunto, mensagem)) return;
+          var data = JSON.stringify({"remetente": remetente.value, "destinatario": destinatario.value, "assunto": assunto.value, "mensagem": mensagem.value});
+          envia_request(metodo, url, data)
+          .then(responseData => {
+              console.log(responseData)
+              window.location = "/menu";
+          })
+          .catch(err => {
+              if (err == 503){
+                  alert("Mensagem nao enviada")
+              }
+          });
+      }
+
+      function envia_request(metodo, url, dados){
+          const promise = new Promise((resolve, reject) => {
+              const xhr = new XMLHttpRequest();
+              xhr.open(metodo, url);
+              if (dados){
+                  xhr.setRequestHeader("Content-Type", "application/json")
+              };
+
+              //Arrow function que recebe a resposta da requisição HTTP
+              xhr.onload = () => {
+                  if (xhr.status == 403){
+                      reject(xhr.status);
+                  }
+                  resolve(xhr.response);
+              };
+              //Arrow function que trata erros HTTP
+              xhr.onerror = () => {
+
+                  reject("Algo deu errado!");
+              };
+
+              xhr.send(dados);
+
+          }
+          );
+          return promise;
+      }
+  </script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header clearfix">
+        <h3 class="text-muted">Envie seu E-mail!</h3>
+      </div>
+      <div class="d-flex justify-content-center">
+          <form>
+            <div class="form-group">
+              <label for="remetente">Remetente:</label>
+              <input type="email" class="form-control" id="remetente" aria-describedby="emailHelp" placeholder="Enter email">
+            </div>
+            <div class="form-group">
+              <label for="destinatario">Destinatario:</label>
+              <input type="email" class="form-control" id="destinatario" aria-describedby="emailHelp" placeholder="Enter email">
+            </div>
+            <div class="form-group">
+              <label for="assunto">Assunto:</label>
+              <input type="email" class="form-control" id="assunto">
+            </div>
+
+            <div class="form-group">
+              <label for="mensagem">Mensagem:</label>
+              <textarea class="form-control" id="mensagem" rows="10"></textarea>
+            </div>
+            <button type="button" class="btn btn-success" onclick="javascript:salvar();">Salvar</button>
+          </form>
+      </div>
+      <footer class="footer">
+        <p>&copy; Hail Sithis
+        </p>
+      </footer>
+    </div> <!-- /container -->
+  </body>
+</html>
